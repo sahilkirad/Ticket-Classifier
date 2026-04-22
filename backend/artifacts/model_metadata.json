@@ -1,0 +1,102 @@
+{
+  "version": "2.0.0",
+  "dataset": "bitext-27k-v11",
+  "confidence_threshold": 0.75,
+  "category_model": {
+    "mlflow_run_id": "8b16298adc05422b8992f7b9630f1c5d",
+    "classes": [
+      "Billing",
+      "Cancellation",
+      "General",
+      "Product Inquiry",
+      "Refund",
+      "Technical Issue"
+    ],
+    "metrics": {
+      "accuracy": 0.9976,
+      "f1_macro": 0.9973,
+      "f1_weighted": 0.9976,
+      "precision_weighted": 0.9976,
+      "recall_weighted": 0.9976,
+      "avg_confidence": 0.9685
+    }
+  },
+  "urgency_model": {
+    "mlflow_run_id": "82892963748a4344a1b5460a0af8327a",
+    "classes": [
+      "Critical",
+      "High",
+      "Low",
+      "Medium"
+    ],
+    "metrics": {
+      "accuracy": 0.9972,
+      "f1_macro": 0.9971,
+      "f1_weighted": 0.9972,
+      "precision_weighted": 0.9972,
+      "recall_weighted": 0.9972,
+      "avg_confidence": 0.9673
+    },
+    "label_source": "intent_mapping"
+  },
+  "routing_rules": {
+    "Billing": "Finance Team",
+    "Refund": "Finance Team",
+    "Technical Issue": "Engineering Team",
+    "Cancellation": "Customer Success Team",
+    "Product Inquiry": "Product Team",
+    "General": "General Support Queue"
+  },
+  "tfidf_config": {
+    "max_features": 6000,
+    "ngram_range": [
+      1,
+      2
+    ],
+    "sublinear_tf": true,
+    "min_df": 2,
+    "max_df": 0.85
+  },
+  "category_map": {
+    "PAYMENT": "Billing",
+    "INVOICE": "Billing",
+    "REFUND": "Refund",
+    "ORDER": "Technical Issue",
+    "ACCOUNT": "Technical Issue",
+    "CANCEL": "Cancellation",
+    "SUBSCRIPTION": "Cancellation",
+    "DELIVERY": "Product Inquiry",
+    "SHIPPING": "Product Inquiry",
+    "FEEDBACK": "General",
+    "CONTACT": "General"
+  },
+  "intent_to_urgency": {
+    "complaint": "Critical",
+    "payment_issue": "Critical",
+    "registration_problems": "Critical",
+    "get_refund": "High",
+    "cancel_order": "High",
+    "track_refund": "High",
+    "delete_account": "High",
+    "check_cancellation_fee": "High",
+    "change_order": "Medium",
+    "change_shipping_address": "Medium",
+    "track_order": "Medium",
+    "get_invoice": "Medium",
+    "check_invoice": "Medium",
+    "place_order": "Medium",
+    "set_up_shipping_address": "Medium",
+    "recover_password": "Medium",
+    "edit_account": "Medium",
+    "check_refund_policy": "Low",
+    "check_payment_methods": "Low",
+    "delivery_options": "Low",
+    "delivery_period": "Low",
+    "contact_customer_service": "Low",
+    "contact_human_agent": "Low",
+    "create_account": "Low",
+    "switch_account": "Low",
+    "newsletter_subscription": "Low",
+    "review": "Low"
+  }
+}

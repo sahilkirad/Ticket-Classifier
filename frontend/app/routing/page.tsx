@@ -1,8 +1,3 @@
-// explanation about why those changes were done.
-// Implements team-wise routed queue visualization from /tickets/routed.
-
-// Internal working of code
-// Fetches grouped payload, iterates by team, and renders ticket cards under each routing destination.
 "use client";
 
 import { useEffect, useState } from "react";
@@ -37,30 +32,51 @@ export default function RoutingPage() {
   const groups = data?.routed_tickets ?? {};
 
   return (
-    <section className="space-y-4">
-      <div className="flex items-center gap-3">
-        <h1 className="text-2xl font-semibold">Routing Queues</h1>
-        <button onClick={() => void loadRouted()} className="rounded-md border px-3 py-1 text-sm">
-          Refresh
+    <section className="space-y-5">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h1 className="text-3xl font-bold">Routing Queues</h1>
+          <p className="mt-1 text-sm" style={{ color: "var(--text-secondary)" }}>
+            Live queue grouped by destination teams from model category decisions.
+          </p>
+        </div>
+        <button onClick={() => void loadRouted()} className="btn-ui btn-ghost">
+          RF Refresh
         </button>
       </div>
 
-      {loading && <div className="text-sm text-slate-600">Loading...</div>}
-      {error && <div className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700">{error}</div>}
-
-      {!loading && !error && Object.keys(groups).length === 0 && (
-        <div className="text-sm text-slate-600">No routed tickets yet.</div>
+      {loading && <div className="shimmer h-32 rounded-2xl" />}
+      {error && (
+        <div className="rounded-xl border px-3 py-2 text-sm" style={{ borderColor: "color-mix(in srgb, var(--error) 35%, transparent)", color: "var(--error)" }}>
+          {error}
+        </div>
       )}
 
-      <div className="space-y-5">
+      {!loading && !error && Object.keys(groups).length === 0 && (
+        <div className="card-ui text-sm" style={{ color: "var(--text-secondary)" }}>
+          No routed tickets yet.
+        </div>
+      )}
+
+      <div className="grid gap-4 xl:grid-cols-2">
         {Object.entries(groups).map(([team, tickets]) => (
-          <div key={team} className="rounded-lg border bg-white p-4">
-            <h2 className="mb-3 text-lg font-semibold">{team}</h2>
-            <div className="space-y-3">
+          <div key={team} className="card-ui fade-in-up space-y-3">
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-semibold">{team}</h2>
+              <span className="badge-ui" style={{ color: "var(--info)", backgroundColor: "color-mix(in srgb, var(--info) 15%, transparent)" }}>
+                Q {tickets.length}
+              </span>
+            </div>
+
+            <div className="space-y-2">
               {tickets.map((ticket) => (
-                <div key={ticket.id} className="rounded-md border p-3">
-                  <div className="mb-1 text-xs text-slate-500">{ticket.id}</div>
-                  <p className="mb-2 text-sm">{ticket.text}</p>
+                <div key={ticket.id} className="rounded-xl border p-3" style={{ borderColor: "var(--border)", backgroundColor: "color-mix(in srgb, var(--bg-secondary) 65%, transparent)" }}>
+                  <div className="mb-1 text-xs tabular-nums" style={{ color: "var(--text-muted)" }}>
+                    {ticket.id}
+                  </div>
+                  <p className="mb-2 text-sm" style={{ color: "var(--text-primary)" }}>
+                    {ticket.text}
+                  </p>
                   <div className="flex flex-wrap items-center gap-2">
                     <CategoryBadge value={ticket.predicted_category} />
                     <UrgencyBadge value={ticket.predicted_urgency} />

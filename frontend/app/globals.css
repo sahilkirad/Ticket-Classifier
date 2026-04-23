@@ -1,0 +1,259 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg-primary: #f8fafc;
+  --bg-secondary: #f1f5f9;
+  --bg-card: #ffffff;
+  --bg-card-hover: #f8fafc;
+
+  --accent-primary: #4f46e5;
+  --accent-secondary: #7c3aed;
+  --accent-glow: rgba(79, 70, 229, 0.18);
+
+  --success: #059669;
+  --warning: #d97706;
+  --error: #dc2626;
+  --info: #2563eb;
+
+  --critical: #dc2626;
+  --high: #ea580c;
+  --medium: #d97706;
+  --low: #059669;
+
+  --billing: #4f46e5;
+  --refund: #7c3aed;
+  --technical: #2563eb;
+  --cancellation: #ea580c;
+  --product: #059669;
+  --general: #64748b;
+
+  --text-primary: #0f172a;
+  --text-secondary: #334155;
+  --text-muted: #64748b;
+
+  --border: rgba(15, 23, 42, 0.1);
+  --border-hover: rgba(15, 23, 42, 0.18);
+}
+
+.dark {
+  --bg-primary: #0a0a0f;
+  --bg-secondary: #111118;
+  --bg-card: #16161f;
+  --bg-card-hover: #1c1c28;
+
+  --accent-primary: #6366f1;
+  --accent-secondary: #8b5cf6;
+  --accent-glow: rgba(99, 102, 241, 0.15);
+
+  --success: #10b981;
+  --warning: #f59e0b;
+  --error: #ef4444;
+  --info: #3b82f6;
+
+  --critical: #ef4444;
+  --high: #f97316;
+  --medium: #f59e0b;
+  --low: #10b981;
+
+  --billing: #6366f1;
+  --refund: #8b5cf6;
+  --technical: #3b82f6;
+  --cancellation: #f97316;
+  --product: #10b981;
+  --general: #6b7280;
+
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --text-muted: #475569;
+
+  --border: rgba(255, 255, 255, 0.06);
+  --border-hover: rgba(255, 255, 255, 0.12);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: "Inter", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  letter-spacing: -0.02em;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--text-muted) 50%, transparent);
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: color-mix(in srgb, var(--text-secondary) 55%, transparent);
+}
+
+.glow-indigo {
+  box-shadow: 0 0 40px color-mix(in srgb, var(--accent-primary) 20%, transparent);
+}
+
+.glow-emerald {
+  box-shadow: 0 0 40px color-mix(in srgb, var(--success) 20%, transparent);
+}
+
+.glow-red {
+  box-shadow: 0 0 40px color-mix(in srgb, var(--error) 20%, transparent);
+}
+
+.gradient-border {
+  position: relative;
+  background:
+    linear-gradient(var(--bg-card), var(--bg-card)) padding-box,
+    linear-gradient(135deg, var(--accent-primary), var(--accent-secondary)) border-box;
+  border: 1px solid transparent;
+  border-radius: 16px;
+}
+
+.glass {
+  background: color-mix(in srgb, var(--bg-card) 85%, transparent);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--border);
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.shimmer {
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--bg-card) 85%, transparent) 25%,
+    color-mix(in srgb, var(--bg-card-hover) 95%, transparent) 50%,
+    color-mix(in srgb, var(--bg-card) 85%, transparent) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes pulse-dot {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.3;
+  }
+}
+
+.pulse-dot {
+  animation: pulse-dot 2s infinite;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in-up {
+  animation: fadeInUp 0.4s ease forwards;
+}
+
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+  font-family: "JetBrains Mono", monospace;
+}
+
+@layer components {
+  .card-ui {
+    @apply rounded-2xl border p-5 transition-all duration-200;
+    border-color: var(--border);
+    background-color: var(--bg-card);
+  }
+
+  .card-ui:hover {
+    border-color: var(--border-hover);
+    background-color: var(--bg-card-hover);
+  }
+
+  .btn-ui {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition-all duration-200;
+  }
+
+  .btn-ui:hover {
+    transform: scale(1.02);
+  }
+
+  .btn-primary {
+    background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+    color: white;
+    box-shadow: 0 12px 30px color-mix(in srgb, var(--accent-primary) 25%, transparent);
+  }
+
+  .btn-success {
+    background: linear-gradient(135deg, var(--success), color-mix(in srgb, var(--success) 75%, #22c55e));
+    color: white;
+    box-shadow: 0 12px 30px color-mix(in srgb, var(--success) 22%, transparent);
+  }
+
+  .btn-ghost {
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    background-color: color-mix(in srgb, var(--bg-card) 90%, transparent);
+  }
+
+  .btn-ghost:hover {
+    border-color: var(--border-hover);
+    color: var(--text-primary);
+  }
+
+  .input-ui {
+    @apply w-full rounded-xl border px-3 py-2.5 text-sm outline-none transition-all duration-200;
+    color: var(--text-primary);
+    border-color: var(--border);
+    background: color-mix(in srgb, var(--bg-secondary) 85%, transparent);
+  }
+
+  .input-ui:focus {
+    border-color: color-mix(in srgb, var(--accent-primary) 65%, transparent);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-primary) 25%, transparent);
+  }
+
+  .badge-ui {
+    @apply inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold;
+  }
+}

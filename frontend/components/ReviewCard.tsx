@@ -1,11 +1,6 @@
-// explanation about why those changes were done.
-// This implements the human review interaction: agent can confirm/correct labels and submit feedback.
+"use client";
 
-// Internal working of code
-// The card shows model output, captures agent labels/ID, posts to /feedback, and triggers parent refresh callback.
-// "use client";
-
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { submitFeedback } from "../lib/api";
 import type { Ticket } from "../types";
 import CategoryBadge from "./CategoryBadge";
@@ -14,104 +9,155 @@ import UrgencyBadge from "./UrgencyBadge";
 
 interface Props {
   ticket: Ticket;
-  onSubmitted: () => void;
+  onSubmitted: (mode: "confirmed" | "corrected") => void;
 }
 
-const categoryOptions = [
-  "Billing",
-  "Refund",
-  "Technical Issue",
-  "Cancellation",
-  "Product Inquiry",
-  "General",
-];
-
+const categoryOptions = ["Billing", "Refund", "Technical Issue", "Cancellation", "Product Inquiry", "General"];
 const urgencyOptions = ["Critical", "High", "Medium", "Low"];
 
 export default function ReviewCard({ ticket, onSubmitted }: Props) {
-  const [agentCategory, setAgentCategory] = useState(ticket.predicted_category || "General");
-  const [agentUrgency, setAgentUrgency] = useState(ticket.predicted_urgency || "Low");
-  const [agentId, setAgentId] = useState("agent_001");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const initialCategory = ticket.predicted_category || "General";
+  const initialUrgency = ticket.predicted_urgency || "Low";
 
-  async function handleSubmit() {
+  const [agentCategory, setAgentCategory] = useState(initialCategory);
+  const [agentUrgency, setAgentUrgency] = useState(initialUrgency);
+  const [agentId, setAgentId] = useState("agent_001");
+  const [loadingMode, setLoadingMode] = useState<"confirmed" | "corrected" | null>(null);
+  const [error, setError] = useState("");
+  const [done, setDone] = useState(false);
+  const [showToast, setShowToast] = useState(false);
+
+  const isChanged = useMemo(
+    () => agentCategory !== initialCategory || agentUrgency !== initialUrgency,
+    [agentCategory, agentUrgency, initialCategory, initialUrgency],
+  );
+
+  async function handleSubmit(mode: "confirmed" | "corrected") {
     setError("");
+    setLoadingMode(mode);
+
     try {
-      setLoading(true);
       await submitFeedback({
         ticket_id: ticket.id,
         agent_category: agentCategory,
         agent_urgency: agentUrgency,
         agent_id: agentId || "agent_001",
       });
-      onSubmitted();
+
+      setDone(true);
+      if (mode === "corrected") {
+        setShowToast(true);
+        window.setTimeout(() => setShowToast(false), 1800);
+      }
+
+      window.setTimeout(() => onSubmitted(mode), 320);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to submit feedback.");
     } finally {
-      setLoading(false);
+      setLoadingMode(null);
     }
   }
 
   return (
-    <div className="space-y-3 rounded-lg border bg-white p-4">
-      <div className="text-xs text-slate-500">Ticket ID: {ticket.id}</div>
-      <p className="text-sm">{ticket.text}</p>
-
-      <div className="flex flex-wrap items-center gap-2 text-sm">
-        <span>Model Category:</span>
-        <CategoryBadge value={ticket.predicted_category} />
-        <ConfidenceBadge value={ticket.category_confidence} />
-      </div>
-
-      <div className="flex flex-wrap items-center gap-2 text-sm">
-        <span>Model Urgency:</span>
-        <UrgencyBadge value={ticket.predicted_urgency} />
-        <ConfidenceBadge value={ticket.urgency_confidence} />
-      </div>
-
-      <div className="grid gap-2 md:grid-cols-3">
-        <select
-          value={agentCategory}
-          onChange={(e) => setAgentCategory(e.target.value)}
-          className="rounded-md border p-2 text-sm"
+    <div className="relative">
+      {showToast && (
+        <div
+          className="fade-in-up absolute -top-3 right-0 z-10 rounded-xl border px-3 py-2 text-xs font-medium"
+          style={{
+            color: "var(--success)",
+            borderColor: "color-mix(in srgb, var(--success) 35%, transparent)",
+            backgroundColor: "color-mix(in srgb, var(--success) 12%, transparent)",
+          }}
         >
-          {categoryOptions.map((item) => (
-            <option key={item} value={item}>
-              {item}
-            </option>
-          ))}
-        </select>
+          Correction submitted successfully
+        </div>
+      )}
 
-        <select
-          value={agentUrgency}
-          onChange={(e) => setAgentUrgency(e.target.value)}
-          className="rounded-md border p-2 text-sm"
-        >
-          {urgencyOptions.map((item) => (
-            <option key={item} value={item}>
-              {item}
-            </option>
-          ))}
-        </select>
+      <div className={`card-ui transition-all duration-300 ${done ? "translate-x-4 opacity-0" : "translate-x-0 opacity-100"}`}>
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+          <span className="tabular-nums text-xs" style={{ color: "var(--text-muted)" }}>
+            Ticket ID: {ticket.id}
+          </span>
+          <ConfidenceBadge value={ticket.combined_confidence} />
+        </div>
 
-        <input
-          value={agentId}
-          onChange={(e) => setAgentId(e.target.value)}
-          placeholder="agent_001"
-          className="rounded-md border p-2 text-sm"
-        />
+        <p className="mb-4 text-sm leading-6" style={{ color: "var(--text-primary)" }}>
+          {ticket.text}
+        </p>
+
+        <div className="mb-4 grid gap-3 md:grid-cols-2">
+          <div className="rounded-xl border p-3" style={{ borderColor: "var(--border)" }}>
+            <div className="mb-2 text-xs uppercase" style={{ color: "var(--text-muted)" }}>
+              Model Category
+            </div>
+            <div className="flex items-center gap-2">
+              <CategoryBadge value={ticket.predicted_category} />
+              <ConfidenceBadge value={ticket.category_confidence} />
+            </div>
+          </div>
+          <div className="rounded-xl border p-3" style={{ borderColor: "var(--border)" }}>
+            <div className="mb-2 text-xs uppercase" style={{ color: "var(--text-muted)" }}>
+              Model Urgency
+            </div>
+            <div className="flex items-center gap-2">
+              <UrgencyBadge value={ticket.predicted_urgency} />
+              <ConfidenceBadge value={ticket.urgency_confidence} />
+            </div>
+          </div>
+        </div>
+
+        <div className="mb-4 grid gap-3 md:grid-cols-3">
+          <select value={agentCategory} onChange={(e) => setAgentCategory(e.target.value)} className="input-ui">
+            {categoryOptions.map((item) => (
+              <option key={item} value={item}>
+                {item}
+              </option>
+            ))}
+          </select>
+
+          <select value={agentUrgency} onChange={(e) => setAgentUrgency(e.target.value)} className="input-ui">
+            {urgencyOptions.map((item) => (
+              <option key={item} value={item}>
+                {item}
+              </option>
+            ))}
+          </select>
+
+          <input value={agentId} onChange={(e) => setAgentId(e.target.value)} placeholder="agent_001" className="input-ui" />
+        </div>
+
+        {error && (
+          <div className="mb-3 text-sm" style={{ color: "var(--error)" }}>
+            {error}
+          </div>
+        )}
+
+        <div className="flex flex-wrap items-center gap-3">
+          <button
+            type="button"
+            onClick={() => handleSubmit("confirmed")}
+            disabled={loadingMode !== null}
+            className="btn-ui btn-success disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            <span className="tabular-nums text-[10px]">{loadingMode === "confirmed" ? ".." : "OK"}</span>
+            Confirm
+          </button>
+
+          <button
+            type="button"
+            onClick={() => handleSubmit("corrected")}
+            disabled={!isChanged || loadingMode !== null}
+            className="btn-ui btn-primary disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            <span className="tabular-nums text-[10px]">{loadingMode === "corrected" ? ".." : "ED"}</span>
+            Submit Correction
+          </button>
+
+          <span className="text-xs" style={{ color: "var(--text-muted)" }}>
+            {isChanged ? "Correction detected" : "No changes from model prediction"}
+          </span>
+        </div>
       </div>
-
-      {error && <div className="text-sm text-red-600">{error}</div>}
-
-      <button
-        onClick={handleSubmit}
-        disabled={loading}
-        className="rounded-md bg-blue-600 px-3 py-2 text-sm text-white disabled:opacity-60"
-      >
-        {loading ? "Submitting..." : "Submit Feedback"}
-      </button>
     </div>
   );
 }
